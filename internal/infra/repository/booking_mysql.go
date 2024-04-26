@@ -45,12 +45,23 @@ func NewDatabaseBookingRepository(username, password, host, port, database strin
 	}
 }
 
-func (repo DatabaseBookingRepository) CreateReservation(reservation *entity.ReservationEntity) error {
-	_, err := repo.db.Exec(createReservationQuery, reservation.UserID, reservation.RoomID)
+func (repo DatabaseBookingRepository) CreateReservation(reservation *entity.ReservationEntity) (*entity.ReservationEntity, error) {
+	result, err := repo.db.Exec(createReservationQuery, reservation.UserID, reservation.RoomID)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+
+	insertedID, err := result.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+
+	createdReservation := &entity.ReservationEntity{
+		ID:     insertedID,
+		UserID: reservation.UserID,
+		RoomID: reservation.RoomID,
+	}
+	return createdReservation, nil
 }
 
 func (repo DatabaseBookingRepository) GetReservationByID(id int64) (*entity.ReservationEntity, error) {

@@ -1,6 +1,6 @@
 package entity
 
 type ReservationRepository interface {
-	CreateReservation(reservation *ReservationEntity) error
+	CreateReservation(reservation *ReservationEntity) (*ReservationEntity, error)
 	GetReservationByID(id int64) (*ReservationEntity, error)
 }
