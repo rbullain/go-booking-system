@@ -59,3 +59,25 @@ func (api *Application) CreateRoom(ctx *gin.Context) {
 		ctx.JSON(http.StatusCreated, roomDTO)
 	}
 }
+
+func (api *Application) GetReservation(ctx *gin.Context) {
+	reservationDTO, err := api.bookingController.GetReservationByID(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+	} else {
+		ctx.JSON(http.StatusOK, reservationDTO)
+	}
+}
+
+func (api *Application) CreateReservation(ctx *gin.Context) {
+	reservationDTO, err := api.bookingController.CreateReservation(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+	} else {
+		ctx.JSON(http.StatusCreated, reservationDTO)
+	}
+}

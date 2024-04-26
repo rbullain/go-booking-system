@@ -12,6 +12,8 @@ type BookingController interface {
 	CreateUser(ctx *gin.Context) (*dto.UserCreateResponseDTO, error)
 	GetRoomByID(ctx *gin.Context) (*dto.RoomRetrieveResponseDTO, error)
 	CreateRoom(ctx *gin.Context) (*dto.RoomCreateResponseDTO, error)
+	GetReservationByID(ctx *gin.Context) (*dto.ReservationRetrieveResponseDTO, error)
+	CreateReservation(ctx *gin.Context) (*dto.ReservationCreateResponseDTO, error)
 }
 
 var _ BookingController = bookingController{}
@@ -110,6 +112,48 @@ func (controller bookingController) CreateRoom(ctx *gin.Context) (*dto.RoomCreat
 		ID:    room.ID,
 		Name:  room.Name,
 		Price: room.Price,
+	}
+	return response, nil
+}
+
+func (controller bookingController) GetReservationByID(ctx *gin.Context) (*dto.ReservationRetrieveResponseDTO, error) {
+	idParam := ctx.Param("id")
+
+	reservationId, err := strconv.ParseInt(idParam, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	reservation, err := controller.reservationService.GetReservationByID(reservationId)
+	if err != nil {
+		return nil, err
+	}
+
+	response := &dto.ReservationRetrieveResponseDTO{
+		ID:     reservation.ID,
+		UserID: reservation.UserID,
+		RoomID: reservation.RoomID,
+	}
+	return response, nil
+}
+
+func (controller bookingController) CreateReservation(ctx *gin.Context) (*dto.ReservationCreateResponseDTO, error) {
+	var reservationDTO dto.ReservationCreateRequestDTO
+
+	err := ctx.ShouldBind(&reservationDTO)
+	if err != nil {
+		return nil, err
+	}
+
+	reservation, err := controller.reservationService.CreateReservation(reservationDTO.UserID, reservationDTO.RoomID)
+	if err != nil {
+		return nil, err
+	}
+
+	response := &dto.ReservationCreateResponseDTO{
+		ID:     reservation.ID,
+		UserID: reservation.UserID,
+		RoomID: reservation.RoomID,
 	}
 	return response, nil
 }
