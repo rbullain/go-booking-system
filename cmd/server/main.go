@@ -18,8 +18,17 @@ var (
 func main() {
 	router := gin.Default()
 
-	router.POST("/user", bookingApplication.CreateUser)
-	router.POST("/room", bookingApplication.CreateRoom)
+	userRoute := router.Group("/user")
+	{
+		userRoute.POST("/", bookingApplication.CreateUser)
+		userRoute.GET("/:id", bookingApplication.GetUser)
+	}
+
+	roomRouter := router.Group("/room")
+	{
+		roomRouter.POST("/", bookingApplication.CreateRoom)
+		roomRouter.GET("/:id", bookingApplication.GetRoom)
+	}
 
 	_ = router.Run("localhost:8080")
 }

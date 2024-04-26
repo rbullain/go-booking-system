@@ -10,6 +10,7 @@ import (
 type BookingController interface {
 	GetUserByID(ctx *gin.Context) (*dto.UserRetrieveResponseDTO, error)
 	CreateUser(ctx *gin.Context) (*dto.UserCreateResponseDTO, error)
+	GetRoomByID(ctx *gin.Context) (*dto.RoomRetrieveResponseDTO, error)
 	CreateRoom(ctx *gin.Context) (*dto.RoomCreateResponseDTO, error)
 }
 
