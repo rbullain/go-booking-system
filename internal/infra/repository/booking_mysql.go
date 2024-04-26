@@ -13,8 +13,8 @@ const (
 	getUserByIDQuery = "SELECT id, name, balance FROM user WHERE id = ?"
 	createUserQuery  = "INSERT INTO user (name, balance) VALUES (?, ?)"
 
-	getRoomByIDQuery = "SELECT id, price FROM room WHERE id = ?"
-	createRoomQuery  = "INSERT INTO room (price) VALUES (?)"
+	getRoomByIDQuery = "SELECT id, name, price FROM room WHERE id = ?"
+	createRoomQuery  = "INSERT INTO room (name, price) VALUES (?, ?)"
 
 	getReservationByIDQuery = "SELECT (id, user_id, room_id) FROM reservation WHERE id = ?"
 	createReservationQuery  = "INSERT INTO reservation (user_id, room_id) VALUES (?, ?)"
@@ -66,12 +66,23 @@ func (repo DatabaseBookingRepository) GetReservationByID(id int64) (*entity.Rese
 	return &reservation, nil
 }
 
-func (repo DatabaseBookingRepository) CreateUser(user *entity.UserEntity) error {
-	_, err := repo.db.Exec(createUserQuery, user.Name, user.Balance)
+func (repo DatabaseBookingRepository) CreateUser(user *entity.UserEntity) (*entity.UserEntity, error) {
+	result, err := repo.db.Exec(createUserQuery, user.Name, user.Balance)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+
+	insertedID, err := result.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+
+	createdUser := &entity.UserEntity{
+		ID:      insertedID,
+		Name:    user.Name,
+		Balance: user.Balance,
+	}
+	return createdUser, nil
 }
 
 func (repo DatabaseBookingRepository) GetUserByID(id int64) (*entity.UserEntity, error) {
@@ -87,12 +98,23 @@ func (repo DatabaseBookingRepository) GetUserByID(id int64) (*entity.UserEntity,
 	return &user, nil
 }
 
-func (repo DatabaseBookingRepository) CreateRoom(room *entity.RoomEntity) error {
-	_, err := repo.db.Exec(createRoomQuery, room.Price)
+func (repo DatabaseBookingRepository) CreateRoom(room *entity.RoomEntity) (*entity.RoomEntity, error) {
+	result, err := repo.db.Exec(createRoomQuery, room.Name, room.Price)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+
+	insertedID, err := result.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+
+	createdRoom := &entity.RoomEntity{
+		ID:    insertedID,
+		Name:  room.Name,
+		Price: room.Price,
+	}
+	return createdRoom, nil
 }
 
 func (repo DatabaseBookingRepository) GetRoomByID(id int64) (*entity.RoomEntity, error) {
@@ -100,7 +122,7 @@ func (repo DatabaseBookingRepository) GetRoomByID(id int64) (*entity.RoomEntity,
 
 	var room entity.RoomEntity
 
-	err := row.Scan(&room.ID, &room.Price)
+	err := row.Scan(&room.ID, &room.Name, &room.Price)
 	if err != nil {
 		return nil, err
 	}

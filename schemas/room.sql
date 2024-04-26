@@ -3,5 +3,6 @@ DROP TABLE IF EXISTS room;
 CREATE TABLE room
 (
     id    BIGINT PRIMARY KEY AUTO_INCREMENT,
+    name    VARCHAR(255),
     price FLOAT
 );
