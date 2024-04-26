@@ -1,0 +1,7 @@
+DROP TABLE IF EXISTS room;
+
+CREATE TABLE room
+(
+    id    BIGINT PRIMARY KEY AUTO_INCREMENT,
+    price FLOAT
+);
