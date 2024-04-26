@@ -10,3 +10,9 @@ type UserCreateResponseDTO struct {
 	Name    string  `json:"name" binding:"required"`
 	Balance float64 `json:"balance" binding:"required"`
 }
+
+type UserRetrieveResponseDTO struct {
+	ID      int64   `json:"id" binding:"required"`
+	Name    string  `json:"name" binding:"required"`
+	Balance float64 `json:"balance" binding:"required"`
+}

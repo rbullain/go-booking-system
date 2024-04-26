@@ -4,9 +4,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"go-booking-system/internal/api/dto"
 	"go-booking-system/internal/domain/booking/service"
+	"strconv"
 )
 
 type BookingController interface {
+	GetUserByID(ctx *gin.Context) (*dto.UserRetrieveResponseDTO, error)
 	CreateUser(ctx *gin.Context) (*dto.UserCreateResponseDTO, error)
 	CreateRoom(ctx *gin.Context) (*dto.RoomCreateResponseDTO, error)
 }
@@ -27,6 +29,27 @@ func NewBookingController(userService service.UserService, roomService service.R
 	}
 }
 
+func (controller bookingController) GetUserByID(ctx *gin.Context) (*dto.UserRetrieveResponseDTO, error) {
+	idParam := ctx.Param("id")
+
+	userId, err := strconv.ParseInt(idParam, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := controller.userService.GetUserByID(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	response := &dto.UserRetrieveResponseDTO{
+		ID:      user.ID,
+		Name:    user.Name,
+		Balance: user.Balance,
+	}
+	return response, nil
+}
+
 func (controller bookingController) CreateUser(ctx *gin.Context) (*dto.UserCreateResponseDTO, error) {
 	var userDTO dto.UserCreateRequestDTO
 
@@ -44,6 +67,27 @@ func (controller bookingController) CreateUser(ctx *gin.Context) (*dto.UserCreat
 		ID:      user.ID,
 		Name:    user.Name,
 		Balance: user.Balance,
+	}
+	return response, nil
+}
+
+func (controller bookingController) GetRoomByID(ctx *gin.Context) (*dto.RoomRetrieveResponseDTO, error) {
+	idParam := ctx.Param("id")
+
+	roomId, err := strconv.ParseInt(idParam, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	room, err := controller.roomService.GetRoomByID(roomId)
+	if err != nil {
+		return nil, err
+	}
+
+	response := &dto.RoomRetrieveResponseDTO{
+		ID:    room.ID,
+		Name:  room.Name,
+		Price: room.Price,
 	}
 	return response, nil
 }

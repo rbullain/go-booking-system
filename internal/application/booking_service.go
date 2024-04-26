@@ -15,12 +15,21 @@ type bookingService struct {
 	repository entity.BookingRepository
 }
 
+var _ BookingService = &bookingService{}
+
 func NewBookingService(repository entity.BookingRepository) BookingService {
 	return &bookingService{
 		repository: repository,
 	}
 }
 
+func (service *bookingService) GetUserByID(id int64) (*entity.UserEntity, error) {
+	user, err := service.repository.GetUserByID(id)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
 func (service *bookingService) CreateUser(name string, balance float64) (*entity.UserEntity, error) {
 	newUser := &entity.UserEntity{
 		Name:    name,
@@ -31,6 +40,14 @@ func (service *bookingService) CreateUser(name string, balance float64) (*entity
 		return nil, err
 	}
 	return newUser, nil
+}
+
+func (service *bookingService) GetRoomByID(id int64) (*entity.RoomEntity, error) {
+	room, err := service.repository.GetRoomByID(id)
+	if err != nil {
+		return nil, err
+	}
+	return room, nil
 }
 
 func (service *bookingService) CreateRoom(name string, price float64) (*entity.RoomEntity, error) {

@@ -16,6 +16,8 @@ func NewBookingApplication(bookingController controller.BookingController) *Appl
 	}
 }
 
+func (api *Application) GetUser(ctx *gin.Context) {}
+
 func (api *Application) CreateUser(ctx *gin.Context) {
 	userDTO, err := api.bookingController.CreateUser(ctx)
 	if err != nil {
