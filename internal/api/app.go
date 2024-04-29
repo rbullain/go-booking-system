@@ -1,18 +1,21 @@
 package api
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"go-booking-system/internal/api/controller"
 	"go-booking-system/internal/rabbitmq/client"
+	"go-booking-system/internal/rabbitmq/events"
 	"net/http"
+	"time"
 )
 
 type Application struct {
 	bookingController controller.IBookingController
-	rabbitmqClient    client.RabbitMQConnection
+	rabbitmqClient    client.BookingMessageClient
 }
 
-func NewBookingApplication(bookingController controller.IBookingController, rabbitmqClient client.RabbitMQConnection) *Application {
+func NewBookingApplication(bookingController controller.IBookingController, rabbitmqClient client.BookingMessageClient) *Application {
 	return &Application{
 		bookingController: bookingController,
 		rabbitmqClient:    rabbitmqClient,
@@ -37,7 +40,15 @@ func (api *Application) CreateUser(ctx *gin.Context) {
 			"error": err.Error(),
 		})
 	} else {
-		// TODO: Send UserCreatedEvent message to RabbitQM
+		userCreatedEvent := events.UserCreatedEvent{
+			ID:          userDTO.ID,
+			Name:        userDTO.Name,
+			CreatedTime: time.Now(),
+		}
+		err = api.rabbitmqClient.PublishOnQueue(userCreatedEvent, "user.created")
+		if err != nil {
+			fmt.Println(err)
+		}
 		ctx.JSON(http.StatusCreated, userDTO)
 	}
 }

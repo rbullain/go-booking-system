@@ -2,46 +2,93 @@ package client
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	amqp "github.com/rabbitmq/amqp091-go"
+	"go-booking-system/cmd/rabbitmq/config"
 	"go-booking-system/internal/rabbitmq"
 )
 
+var queuesNames = []string{
+	config.QueueUserCreated, config.QueueReservationCreated,
+}
+
 type IMessagingClient interface {
-	Connect(username, password, host, port, vhost string)
-	PublishOnQueue(payload rabbitmq.IPayload, queueName string) error
-	SubscribeToQueue(queueName, consumerName string, handler func(msg amqp.Delivery)) error
+	PublishOnQueue(payload rabbitmq.IRabbitMQPayload, queueName string) error
+	Subscribe(consumerName string, handler func(amqp.Delivery)) error
 	Close()
 }
 
-type RabbitMQConnection struct {
+type BookingMessageClient struct {
 	conn *amqp.Connection
 }
 
-var _ IMessagingClient = RabbitMQConnection{}
+var _ IMessagingClient = BookingMessageClient{}
 
-func (connection RabbitMQConnection) Connect(username, password, host, port, vhost string) {
+func (connection BookingMessageClient) InitializeQueues() {
+	ch, err := connection.conn.Channel()
+	if err != nil {
+		panic(err)
+	}
+	defer ch.Close()
+
+	err = ch.ExchangeDeclare(
+		config.Exchange,
+		"topic",
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	for _, queueName := range queuesNames {
+		queue, err := ch.QueueDeclare(
+			queueName,
+			false,
+			false,
+			false,
+			false,
+			nil,
+		)
+		if err != nil {
+			panic(err)
+		}
+
+		err = ch.QueueBind(
+			queue.Name,
+			queue.Name,
+			config.Exchange,
+			false,
+			nil,
+		)
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
+func NewRabbitMQConnection(username, password, host, port, vhost string) BookingMessageClient {
 	amqpUrl := fmt.Sprintf("amqp://%s:%s@%s:%s/%s", username, password, host, port, vhost)
 	conn, err := amqp.Dial(amqpUrl)
 	if err != nil {
 		panic(err)
 	}
-	connection.conn = conn
+	return BookingMessageClient{
+		conn: conn,
+	}
 }
 
-func NewRabbitMQConnection(username, password, host, port, vhost string) RabbitMQConnection {
-	conn := RabbitMQConnection{}
-	conn.Connect(username, password, host, port, vhost)
-	return conn
-}
-
-func (connection RabbitMQConnection) Close() {
+func (connection BookingMessageClient) Close() {
 	if connection.conn != nil {
 		connection.conn.Close()
 	}
 }
 
-func (connection RabbitMQConnection) publish(body []byte, queueName string) error {
+func (connection BookingMessageClient) publish(body []byte, queueName string) error {
 	ch, err := connection.conn.Channel()
 	if err != nil {
 		return err
@@ -50,12 +97,13 @@ func (connection RabbitMQConnection) publish(body []byte, queueName string) erro
 
 	err = ch.PublishWithContext(
 		context.TODO(),
-		"",
+		config.Exchange,
 		queueName,
 		false,
 		false,
 		amqp.Publishing{
-			Body: body,
+			Body:        body,
+			ContentType: "application/json",
 		},
 	)
 	if err != nil {
@@ -64,8 +112,8 @@ func (connection RabbitMQConnection) publish(body []byte, queueName string) erro
 	return nil
 }
 
-func (connection RabbitMQConnection) PublishOnQueue(payload rabbitmq.IPayload, queueName string) error {
-	body, err := payload.Encode()
+func (connection BookingMessageClient) PublishOnQueue(payload rabbitmq.IRabbitMQPayload, queueName string) error {
+	body, err := json.Marshal(payload)
 	if err != nil {
 		return err
 	}
@@ -84,28 +132,16 @@ func consume(msgs <-chan amqp.Delivery, handler func(msg amqp.Delivery)) {
 	}
 }
 
-func (connection RabbitMQConnection) SubscribeToQueue(queueName, consumerName string, handler func(msg amqp.Delivery)) error {
+func (connection BookingMessageClient) Subscribe(queueName string, handler func(amqp.Delivery)) error {
 	ch, err := connection.conn.Channel()
 	if err != nil {
 		return err
 	}
 	defer ch.Close()
 
-	queue, err := ch.QueueDeclare(
-		queueName,
-		false,
-		false,
-		false,
-		false,
-		nil,
-	)
-	if err != nil {
-		return err
-	}
-
 	msgs, err := ch.Consume(
-		queue.Name,
-		consumerName,
+		queueName,
+		"",
 		true,
 		false,
 		false,

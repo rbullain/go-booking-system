@@ -1,16 +1,23 @@
 package main
 
 import (
-	"log"
+	"go-booking-system/cmd/rabbitmq/config"
+	"go-booking-system/internal/rabbitmq/client"
 )
 
-func failOnError(err error, msg string) {
-	if err != nil {
-		log.Panicf("%s: %s", msg, err)
-	}
-}
+var (
+	rabbitClient = client.NewRabbitMQConnection("guest", "guest", "localhost", "5672", "")
+)
 
 func main() {
-	//conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
-	//failOnError(err, "Failed to connect to RabbitMQ")
+	rabbitClient.InitializeQueues()
+
+	err := rabbitClient.Subscribe(config.QueueUserCreated, rabbitClient.HandleUserCreatedEvent)
+	if err != nil {
+		panic(err)
+	}
+	err = rabbitClient.Subscribe(config.QueueReservationCreated, rabbitClient.HandleReservationCreatedEvent)
+	if err != nil {
+		panic(err)
+	}
 }
