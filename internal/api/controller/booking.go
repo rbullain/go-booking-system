@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-type BookingController interface {
+type IBookingController interface {
 	GetUserByID(ctx *gin.Context) (*dto.UserRetrieveResponseDTO, error)
 	CreateUser(ctx *gin.Context) (*dto.UserCreateResponseDTO, error)
 	GetRoomByID(ctx *gin.Context) (*dto.RoomRetrieveResponseDTO, error)
@@ -16,15 +16,15 @@ type BookingController interface {
 	CreateReservation(ctx *gin.Context) (*dto.ReservationCreateResponseDTO, error)
 }
 
-var _ BookingController = bookingController{}
+var _ IBookingController = bookingController{}
 
 type bookingController struct {
-	userService        service.UserService
-	roomService        service.RoomService
-	reservationService service.ReservationService
+	userService        service.IUserService
+	roomService        service.IRoomService
+	reservationService service.IReservationService
 }
 
-func NewBookingController(userService service.UserService, roomService service.RoomService, reservationService service.ReservationService) BookingController {
+func NewBookingController(userService service.IUserService, roomService service.IRoomService, reservationService service.IReservationService) IBookingController {
 	return &bookingController{
 		userService:        userService,
 		roomService:        roomService,

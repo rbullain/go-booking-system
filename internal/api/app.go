@@ -8,11 +8,11 @@ import (
 )
 
 type Application struct {
-	bookingController controller.BookingController
+	bookingController controller.IBookingController
 	rabbitmqClient    client.RabbitMQConnection
 }
 
-func NewBookingApplication(bookingController controller.BookingController, rabbitmqClient client.RabbitMQConnection) *Application {
+func NewBookingApplication(bookingController controller.IBookingController, rabbitmqClient client.RabbitMQConnection) *Application {
 	return &Application{
 		bookingController: bookingController,
 		rabbitmqClient:    rabbitmqClient,

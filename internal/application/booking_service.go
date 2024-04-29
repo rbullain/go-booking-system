@@ -5,19 +5,19 @@ import (
 	"go-booking-system/internal/domain/booking/service"
 )
 
-type BookingService interface {
-	service.UserService
-	service.RoomService
-	service.ReservationService
+type IBookingService interface {
+	service.IUserService
+	service.IRoomService
+	service.IReservationService
 }
 
 type bookingService struct {
-	repository entity.BookingRepository
+	repository entity.IBookingRepository
 }
 
-var _ BookingService = bookingService{}
+var _ IBookingService = bookingService{}
 
-func NewBookingService(repository entity.BookingRepository) BookingService {
+func NewBookingService(repository entity.IBookingRepository) IBookingService {
 	return &bookingService{
 		repository: repository,
 	}

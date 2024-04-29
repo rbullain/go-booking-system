@@ -7,7 +7,7 @@ import (
 	"go-booking-system/internal/domain/booking/entity"
 )
 
-var _ entity.BookingRepository = DatabaseBookingRepository{}
+var _ entity.IBookingRepository = DatabaseBookingRepository{}
 
 const (
 	getUserByIDQuery = "SELECT id, name, balance FROM user WHERE id = ?"

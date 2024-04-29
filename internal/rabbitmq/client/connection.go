@@ -53,7 +53,7 @@ func (connection RabbitMQConnection) publish(body []byte, queueName string) erro
 	return nil
 }
 
-func (connection RabbitMQConnection) PublishOnQueue(payload rabbitmq.Payload, queueName string) error {
+func (connection RabbitMQConnection) PublishOnQueue(payload rabbitmq.IPayload, queueName string) error {
 	body, err := payload.Encode()
 	if err != nil {
 		return err

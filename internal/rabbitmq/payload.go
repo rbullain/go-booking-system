@@ -2,18 +2,18 @@ package rabbitmq
 
 import "encoding/json"
 
-type Payload interface {
+type IPayload interface {
 	Encode() ([]byte, error)
 	Decode([]byte) error
 }
 
-type PayloadBase struct {
+type JsonPayload struct {
 }
 
-func (payload *PayloadBase) Encode() ([]byte, error) {
+func (payload *JsonPayload) Encode() ([]byte, error) {
 	return json.Marshal(payload)
 }
 
-func (payload *PayloadBase) Decode(bytes []byte) error {
+func (payload *JsonPayload) Decode(bytes []byte) error {
 	return json.Unmarshal(bytes, payload)
 }

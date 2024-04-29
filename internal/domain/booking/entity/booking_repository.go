@@ -1,7 +1,7 @@
 package entity
 
-type BookingRepository interface {
-	ReservationRepository
-	UserRepository
-	RoomRepository
+type IBookingRepository interface {
+	IReservationRepository
+	IUserRepository
+	IRoomRepository
 }
