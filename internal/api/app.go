@@ -3,16 +3,19 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	"go-booking-system/internal/api/controller"
+	"go-booking-system/internal/rabbitmq/client"
 	"net/http"
 )
 
 type Application struct {
 	bookingController controller.BookingController
+	rabbitmqClient    client.RabbitMQConnection
 }
 
-func NewBookingApplication(bookingController controller.BookingController) *Application {
+func NewBookingApplication(bookingController controller.BookingController, rabbitmqClient client.RabbitMQConnection) *Application {
 	return &Application{
 		bookingController: bookingController,
+		rabbitmqClient:    rabbitmqClient,
 	}
 }
 
@@ -34,6 +37,7 @@ func (api *Application) CreateUser(ctx *gin.Context) {
 			"error": err.Error(),
 		})
 	} else {
+		// TODO: Send UserCreatedEvent message to RabbitQM
 		ctx.JSON(http.StatusCreated, userDTO)
 	}
 }
@@ -78,6 +82,7 @@ func (api *Application) CreateReservation(ctx *gin.Context) {
 			"error": err.Error(),
 		})
 	} else {
+		// TODO: Send ReservationCreatedEvent message to RabbitQM
 		ctx.JSON(http.StatusCreated, reservationDTO)
 	}
 }

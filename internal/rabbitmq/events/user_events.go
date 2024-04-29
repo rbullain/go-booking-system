@@ -1,6 +1,13 @@
 package events
 
-type UserCreated struct {
-	ID   int64
-	Name string
+import (
+	"go-booking-system/internal/rabbitmq"
+	"time"
+)
+
+type UserCreatedEvent struct {
+	rabbitmq.PayloadBase
+	ID          int64     `json:"id"`
+	Name        string    `json:"name"`
+	CreatedTime time.Time `json:"created_time"`
 }

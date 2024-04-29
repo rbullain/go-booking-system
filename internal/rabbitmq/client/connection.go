@@ -20,17 +20,17 @@ func connect(username, password, host, port, vhost string) (*amqp.Connection, er
 	return conn, nil
 }
 
-func NewRabbitMQConnection(username, password, host, port, vhost string) *RabbitMQConnection {
+func NewRabbitMQConnection(username, password, host, port, vhost string) RabbitMQConnection {
 	conn, err := connect(username, password, host, port, vhost)
 	if err != nil {
 		panic(err)
 	}
-	return &RabbitMQConnection{
+	return RabbitMQConnection{
 		conn: conn,
 	}
 }
 
-func (connection *RabbitMQConnection) publish(body []byte, queueName string) error {
+func (connection RabbitMQConnection) publish(body []byte, queueName string) error {
 	ch, err := connection.conn.Channel()
 	if err != nil {
 		return err
@@ -53,7 +53,7 @@ func (connection *RabbitMQConnection) publish(body []byte, queueName string) err
 	return nil
 }
 
-func (connection *RabbitMQConnection) PublishOnQueue(payload rabbitmq.Payload, queueName string) error {
+func (connection RabbitMQConnection) PublishOnQueue(payload rabbitmq.Payload, queueName string) error {
 	body, err := payload.Encode()
 	if err != nil {
 		return err
