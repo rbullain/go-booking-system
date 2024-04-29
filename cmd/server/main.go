@@ -33,7 +33,7 @@ func main() {
 	reservationRouter := router.Group("/reservation")
 	{
 		reservationRouter.POST("/", bookingApplication.CreateReservation)
-		roomRouter.GET("/:id", bookingApplication.GetReservation)
+		reservationRouter.GET("/:id", bookingApplication.GetReservation)
 	}
 
 	_ = router.Run("localhost:8080")
