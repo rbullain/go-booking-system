@@ -1,0 +1,16 @@
+{
+  "rabbitmq": {
+    "username": "guest",
+    "password": "guest",
+    "host": "localhost",
+    "port": "5672",
+    "vhost": ""
+  },
+  "database": {
+    "username": "admin",
+    "password": "admin",
+    "host": "localhost",
+    "port": "3306",
+    "database": "golang_learning_booking"
+  }
+}

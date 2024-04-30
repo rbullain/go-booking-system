@@ -1,6 +1,7 @@
 package apifx
 
 import (
+	"go-booking-system/cmd/configfx"
 	"go-booking-system/internal/api"
 	"go-booking-system/internal/api/controller"
 	"go-booking-system/internal/application"
@@ -18,8 +19,8 @@ var Module = fx.Options(
 	),
 )
 
-func newBookingRepository() *repository.DatabaseBookingRepository {
-	return repository.NewDatabaseBookingRepository("admin", "admin", "localhost", "3306", "golang_learning_booking")
+func newBookingRepository(cfg *configfx.Config) *repository.DatabaseBookingRepository {
+	return repository.NewDatabaseBookingRepository(cfg.DatabaseConfig.Username, cfg.DatabaseConfig.Password, cfg.DatabaseConfig.Host, cfg.DatabaseConfig.Port, cfg.DatabaseConfig.Database)
 }
 
 func newBookingService(repo *repository.DatabaseBookingRepository) application.IBookingService {
