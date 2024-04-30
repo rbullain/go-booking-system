@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"github.com/gin-gonic/gin"
+	"go-booking-system/cmd/health"
 	"go-booking-system/internal/api"
 	"go-booking-system/internal/api/controller"
 	"go-booking-system/internal/application"
@@ -80,6 +81,7 @@ func main() {
 			newGinEngine,
 		),
 		fx.Invoke(registerRoutes),
+		fx.Invoke(health.RegisterRoutes),
 		fx.Invoke(startWebServer),
 	)
 	app.Run()
