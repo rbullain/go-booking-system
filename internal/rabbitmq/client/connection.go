@@ -126,19 +126,20 @@ func (connection BookingMessageClient) PublishOnQueue(payload rabbitmq.IRabbitMQ
 	return nil
 }
 
-func consume(msgs <-chan amqp.Delivery, handler func(msg amqp.Delivery)) {
+func consume(errCh chan error, msgs <-chan amqp.Delivery, handler func(msg amqp.Delivery)) {
 	for msg := range msgs {
 		handler(msg)
 	}
+	errCh <- nil
 }
 
 func (connection BookingMessageClient) Subscribe(queueName string, handler func(amqp.Delivery)) chan error {
-	ch := make(chan error, 1)
+	errCh := make(chan error, 1)
 
 	connChannel, err := connection.conn.Channel()
 	if err != nil {
-		ch <- err
-		return ch
+		errCh <- err
+		return errCh
 	}
 
 	msgs, err := connChannel.Consume(
@@ -151,10 +152,10 @@ func (connection BookingMessageClient) Subscribe(queueName string, handler func(
 		nil,
 	)
 	if err != nil {
-		ch <- err
-		return ch
+		errCh <- err
+		return errCh
 	}
 
-	go consume(msgs, handler)
-	return ch
+	go consume(errCh, msgs, handler)
+	return errCh
 }
