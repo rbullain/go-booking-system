@@ -93,7 +93,16 @@ func (api *Application) CreateReservation(ctx *gin.Context) {
 			"error": err.Error(),
 		})
 	} else {
-		// TODO: Send ReservationCreatedEvent message to RabbitQM
+		reservationCreatedEvent := events.ReservationCreated{
+			ID:          reservationDTO.ID,
+			UserId:      reservationDTO.UserID,
+			RoomId:      reservationDTO.RoomID,
+			CreatedTime: time.Now(),
+		}
+		err = api.rabbitmqClient.PublishOnQueue(reservationCreatedEvent, "reservation.created")
+		if err != nil {
+			fmt.Println(err)
+		}
 		ctx.JSON(http.StatusCreated, reservationDTO)
 	}
 }

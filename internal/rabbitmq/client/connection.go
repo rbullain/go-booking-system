@@ -15,7 +15,7 @@ var queuesNames = []string{
 
 type IMessagingClient interface {
 	PublishOnQueue(payload rabbitmq.IRabbitMQPayload, queueName string) error
-	Subscribe(consumerName string, handler func(amqp.Delivery)) error
+	Subscribe(consumerName string, handler func(amqp.Delivery)) chan error
 	Close()
 }
 
@@ -132,14 +132,16 @@ func consume(msgs <-chan amqp.Delivery, handler func(msg amqp.Delivery)) {
 	}
 }
 
-func (connection BookingMessageClient) Subscribe(queueName string, handler func(amqp.Delivery)) error {
-	ch, err := connection.conn.Channel()
-	if err != nil {
-		return err
-	}
-	defer ch.Close()
+func (connection BookingMessageClient) Subscribe(queueName string, handler func(amqp.Delivery)) chan error {
+	ch := make(chan error, 1)
 
-	msgs, err := ch.Consume(
+	connChannel, err := connection.conn.Channel()
+	if err != nil {
+		ch <- err
+		return ch
+	}
+
+	msgs, err := connChannel.Consume(
 		queueName,
 		"",
 		true,
@@ -149,9 +151,10 @@ func (connection BookingMessageClient) Subscribe(queueName string, handler func(
 		nil,
 	)
 	if err != nil {
-		return err
+		ch <- err
+		return ch
 	}
 
 	go consume(msgs, handler)
-	return nil
+	return ch
 }
