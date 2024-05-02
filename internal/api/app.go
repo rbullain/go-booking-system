@@ -12,7 +12,7 @@ import (
 
 type Application struct {
 	bookingController controller.IBookingController
-	rabbitmqClient    client.BookingMessageClient
+	rabbitmqClient    client.IMessagingClient
 }
 
 func NewBookingApplication(bookingController controller.IBookingController, rabbitmqClient client.BookingMessageClient) *Application {
